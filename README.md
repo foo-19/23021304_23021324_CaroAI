@@ -1,11 +1,10 @@
-# 23021304_23021324_CaroAI
 # Caro AI
 
-Game cờ Caro 15×15 với AI sử dụng Minimax và Alpha-Beta Pruning, viết bằng Python + Pygame.
+Game cờ Caro 9×9 với AI sử dụng Minimax và Alpha-Beta Pruning, viết bằng Python + Pygame.
 
 ## Luật chơi
 
-- Bàn cờ 15×15
+- Bàn cờ **9×9**
 - Thắng khi có **4 quân liên tiếp** (ngang / dọc / chéo)
 - Không áp dụng luật chặn 2 đầu
 
@@ -41,6 +40,14 @@ python main.py
 
 ---
 
+## Tính năng
+
+- **Chọn lượt đi trước / sau**: Ở các chế độ có AI (Minimax, AlphaBeta, Ultimate), người chơi có thể chọn **You First** (đi trước, quân X) hoặc **AI First** (đi sau, quân O) ngay trên panel bên phải. Thay đổi lựa chọn sẽ tự động reset ván mới.
+- **Chọn độ khó**: Easy / Medium / Hard tương ứng độ sâu tìm kiếm 1 / 2 / 3.
+- **Tie-breaking**: Cùng điểm số → ưu tiên ô gần trung tâm bàn cờ.
+
+---
+
 ## Cấu trúc thư mục
 
 ```
@@ -56,10 +63,10 @@ source_code/
 │   ├── minimax.py       # Thuật toán Minimax thuần
 │   └── alphabeta.py     # Minimax + Alpha-Beta Pruning + Transposition Table
 └── ui/
-    ├── common.py        # Widget dùng chung (Button, MoveLog, font)
-    ├── board_widget.py  # Vẽ bàn cờ, animation đặt quân
-    ├── screen_menu.py   # Màn menu chính
-    ├── screen_hvh.py    # Human vs Human
+    ├── common.py            # Widget dùng chung (Button, MoveLog, font)
+    ├── board_widget.py      # Vẽ bàn cờ, animation đặt quân
+    ├── screen_menu.py       # Màn menu chính
+    ├── screen_hvh.py        # Human vs Human
     ├── screen_minimax.py    # Human vs Minimax
     ├── screen_alphabeta.py  # Human vs AlphaBeta
     ├── screen_compare.py    # So sánh song song
@@ -79,6 +86,10 @@ source_code/
 - Cắt nhánh không cần thiết khi `alpha >= beta`
 - Giảm trung bình **90–95%** số node so với Minimax
 - Có Transposition Table để tránh tính lại trạng thái đã gặp
+
+### Ultimate AI
+- AlphaBeta + Iterative Deepening: tìm kiếm từ độ sâu 1 tăng dần, lấy kết quả tốt nhất trong thời gian cho phép
+- Độ sâu động theo số nước đã đi (đầu ván nông hơn, cuối ván sâu hơn)
 
 ### Heuristic đánh giá (`eval.py`)
 Mỗi chuỗi quân được gán điểm theo độ dài và độ mở:
@@ -101,9 +112,9 @@ Mỗi lượt AI thực hiện 3 bước theo thứ tự:
 ## Cấu hình (`config.py`)
 
 ```python
-BOARD_SIZE       = 15      # Kích thước bàn cờ
+BOARD_SIZE       = 9       # Kích thước bàn cờ
 WIN_LENGTH       = 4       # Số quân cần để thắng
-CANDIDATE_RADIUS = 3       # Bán kính tìm nước đi xung quanh quân đã đặt
+CANDIDATE_RADIUS = 2       # Bán kính tìm nước đi xung quanh quân đã đặt
 DEPTHS = {"Easy": 1, "Medium": 2, "Hard": 3}
 ```
 
