@@ -47,7 +47,7 @@ class ScreenMenu:
             True, C_DIM)
         self.screen.blit(t2, t2.get_rect(center=(WIN_W//2, 138)))
         t3 = f["small"].render(
-            "Thắng: 4 quân liên tiếp  |  Bàn cờ: 15×15  |  Không luật chặn 2 đầu",
+            "Thắng: 4 quân liên tiếp  |  Bàn cờ: 9×9  |  Không luật chặn 2 đầu",
             True, C_DIM)
         self.screen.blit(t3, t3.get_rect(center=(WIN_W//2, 160)))
 

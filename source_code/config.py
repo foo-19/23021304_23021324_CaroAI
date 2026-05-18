@@ -2,7 +2,7 @@
 #  config.py  –  Caro AI  –  Global Configuration
 # ============================================================
 
-BOARD_SIZE   = 15
+BOARD_SIZE   = 9
 WIN_LENGTH   = 4        # ← đề yêu cầu 4 quân liên tiếp
 EMPTY        = 0
 HUMAN        = 1
@@ -14,12 +14,12 @@ WIN_W = 1280
 WIN_H = 780
 
 # ── Board render ──────────────────────────────────────────────
-CELL  = 40
-BX    = 30          # board left offset
-BY    = 70          # board top  offset
+CELL  = 56              # ô vuông 56×56 px
+BX    = 40              # board left offset
+BY    = 80              # board top  offset
 
 # Panel (right side of board)
-PANEL_X = BX + BOARD_SIZE * CELL + 18
+PANEL_X = BX + BOARD_SIZE * CELL + 24
 PANEL_W = WIN_W - PANEL_X - 6
 
 FPS   = 60
@@ -30,6 +30,8 @@ C_BOARD      = (20, 25, 38)
 C_GRID       = (38, 50, 72)
 C_GRID_HI    = (60, 80, 115)
 C_DOT        = (70, 90, 130)
+C_CELL_FILL  = (24, 30, 46)    # fill màu ô vuông
+C_CELL_BD    = (50, 68, 105)   # viền ô vuông
 
 C_X          = (70,  190, 255)   # Human  – blue
 C_O          = (255, 85,  110)   # AI     – red
@@ -63,7 +65,7 @@ SC_AI_C3     =    2_000
 SC_AI_O2     =    1_000
 SC_AI_C2     =      200
 
-SC_EN_O4     = -900_000   # enemy open-4 = near-win → MUST block (higher than SC_AI_O4)
+SC_EN_O4     = -900_000   # enemy open-4 = near-win → MUST block
 SC_EN_C4     = -150_000
 SC_EN_O3     =  -20_000
 SC_EN_C3     =   -4_000

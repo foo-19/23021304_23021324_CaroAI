@@ -48,7 +48,7 @@ class AlphaBeta:
         for r, c in get_ordered_candidates(grid, AI, self.size):
             grid[r][c] = AI
             self.nodes += 1
-            val = self._ab(grid, self.depth - 1, alpha, beta, is_max=True)
+            val = self._ab(grid, self.depth - 1, alpha, beta, False)
             grid[r][c] = EMPTY
             if best_move is None or val > best_val or (
                 val == best_val and
@@ -61,11 +61,7 @@ class AlphaBeta:
         return MoveResult(best_move, best_val, self.nodes,
                           self.depth, time.perf_counter() - t0, "AlphaBeta")
 
-    def _ab(self, grid, depth, alpha, beta, is_max: bool):
-        """
-        is_max=True  → lượt HUMAN → MIN node
-        is_max=False → lượt AI    → MAX node
-        """
+    def _ab(self, grid, depth, alpha, beta, is_max):
         self.nodes += 1
         key = hash(grid.tobytes())
         if self.use_tt:
@@ -81,40 +77,25 @@ class AlphaBeta:
             return evaluate(grid, self.size)
 
         orig_a = alpha
-        player = HUMAN if is_max else AI
+        best   = -10**9 if is_max else 10**9
+        player = AI if is_max else HUMAN
 
-        if is_max:
-            # Lượt HUMAN – MIN node
-            best = 10**9
-            for r, c in get_ordered_candidates(grid, player, self.size):
-                grid[r][c] = player
-                if check_win(grid, r, c, player, self.size):
-                    grid[r][c] = EMPTY
-                    best = SC_LOSE
-                    break
-                val = self._ab(grid, depth - 1, alpha, beta, is_max=False)
+        for r, c in get_ordered_candidates(grid, player, self.size):
+            grid[r][c] = player
+            if check_win(grid, r, c, player, self.size):
                 grid[r][c] = EMPTY
-                if val < best:
-                    best = val
-                beta = min(beta, best)
-                if alpha >= beta:
-                    break   # alpha cut-off
-        else:
-            # Lượt AI – MAX node
-            best = -10**9
-            for r, c in get_ordered_candidates(grid, player, self.size):
-                grid[r][c] = player
-                if check_win(grid, r, c, player, self.size):
-                    grid[r][c] = EMPTY
-                    best = SC_WIN
-                    break
-                val = self._ab(grid, depth - 1, alpha, beta, is_max=True)
-                grid[r][c] = EMPTY
-                if val > best:
-                    best = val
+                best = SC_WIN if is_max else SC_LOSE
+                break
+            val = self._ab(grid, depth - 1, alpha, beta, not is_max)
+            grid[r][c] = EMPTY
+            if is_max:
+                if val > best: best = val
                 alpha = max(alpha, best)
-                if alpha >= beta:
-                    break   # beta cut-off
+            else:
+                if val < best: best = val
+                beta  = min(beta,  best)
+            if alpha >= beta:
+                break
 
         if self.use_tt:
             flag = EXACT

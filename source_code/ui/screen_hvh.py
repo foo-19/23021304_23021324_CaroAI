@@ -15,7 +15,7 @@ P2 = AI      # = 2  (dùng lại constant, chỉ là số)
 
 PANEL_X = BX + BOARD_SIZE * CELL + 24
 PANEL_W = WIN_W - PANEL_X - 10
-LOG_H   = 220
+LOG_H   = 195
 
 PLAYER_NAME  = {P1: "Player 1 (X)", P2: "Player 2 (O)"}
 PLAYER_COLOR = {P1: C_X,            P2: C_O}
@@ -160,7 +160,7 @@ class ScreenHvH:
 
         # Rules reminder
         draw_label(surf, "LUẬT CHƠI", px, y, f["header"], C_ACC); y += 20
-        for line in ["• Bàn cờ 15×15",
+        for line in ["• Bàn cờ 9×9",
                      "• Thắng: 4 quân liên tiếp",
                      "• Ngang / dọc / chéo",
                      "• Không xét luật chặn 2 đầu"]:

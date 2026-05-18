@@ -15,7 +15,7 @@ from ui.common import Button, MoveLog, make_fonts, draw_label, draw_separator
 
 PANEL_X = BX + BOARD_SIZE * CELL + 24
 PANEL_W = WIN_W - PANEL_X - 10
-LOG_H   = 220
+LOG_H   = 195
 
 
 class ScreenAlphaBeta:
@@ -37,6 +37,11 @@ class ScreenAlphaBeta:
             self.depth_btns.append((b, d))
         self.btn_new  = Button(px,     WIN_H - LOG_H - 46, 120, 34, "New Game", f)
         self.btn_back = Button(px+130, WIN_H - LOG_H - 46, 100, 34, "← Menu",   f)
+
+        # First/second mover selector
+        self._human_first = True
+        self.btn_you_first = Button(px,     112, 100, 28, "You First", f, active=True)
+        self.btn_ai_first  = Button(px+108, 112, 100, 28, "AI First",  f, active=False)
         self.log      = MoveLog(0, WIN_H - LOG_H, WIN_W, LOG_H - 2, self.fonts)
         self.last_res = None
         self._turn_no = 0
@@ -47,12 +52,15 @@ class ScreenAlphaBeta:
         self.board_w._place_anim.clear()
         self.winner = None
         self.state   = "playing"
-        self.current = HUMAN
+        self.current = HUMAN if self._human_first else AI
         self.last_res= None
         self._turn_no= 0
         self._ai_result = None
         self._poll_thread = None
         self.log.clear()
+        if self.current == AI:
+            self.state = "thinking"
+            self._launch_ai()
 
     def handle_event(self, ev) -> str | None:
         self.log.handle(ev)
@@ -63,6 +71,16 @@ class ScreenAlphaBeta:
                     b2.active = (d2 == d)
         if self.btn_new.handle(ev):  self._new_game()
         if self.btn_back.handle(ev): return "menu"
+        if self.btn_you_first.handle(ev):
+            self._human_first = True
+            self.btn_you_first.active = True
+            self.btn_ai_first.active  = False
+            self._new_game()
+        if self.btn_ai_first.handle(ev):
+            self._human_first = False
+            self.btn_you_first.active = False
+            self.btn_ai_first.active  = True
+            self._new_game()
         if self.state == "playing" and self.current == HUMAN:
             cell = self.board_w.handle_event(ev)
             if cell:
@@ -144,8 +162,8 @@ class ScreenAlphaBeta:
         draw_label(surf, "Search Depth:", px, y, f["body"])
         for i,(b,_) in enumerate(self.depth_btns):
             b.move_to(px+i*68, y+18); b.draw(surf)
+        y += 50
 
-        y = 148
         draw_separator(surf, px, y, PANEL_W-10); y += 8
         draw_label(surf, "LAST AI MOVE", px, y, f["header"], C_ACC); y += 22
         r = self.last_res
@@ -161,7 +179,15 @@ class ScreenAlphaBeta:
         y += 10; draw_separator(surf, px, y, PANEL_W-10); y+=8
         draw_label(surf, "BOARD", px, y, f["header"], C_ACC); y+=22
         draw_label(surf, f"Moves:  {self.board.move_count}", px, y, f["body"]); y+=20
-        draw_label(surf, f"Empty:  {BOARD_SIZE**2 - self.board.move_count}", px, y, f["body"])
+        draw_label(surf, f"Empty:  {BOARD_SIZE**2 - self.board.move_count}", px, y, f["body"]); y+=28
+
+        # Lượt đi selector
+        draw_separator(surf, px, y, PANEL_W-10); y+=8
+        draw_label(surf, "Lượt đi:", px, y, f["body"]); y+=20
+        self.btn_you_first.move_to(px,     y)
+        self.btn_ai_first.move_to(px+108,  y)
+        self.btn_you_first.draw(surf)
+        self.btn_ai_first.draw(surf)
 
         self.btn_new.draw(surf)
         self.btn_back.draw(surf)

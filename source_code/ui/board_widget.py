@@ -1,18 +1,13 @@
-"""Reusable board widget – can be placed anywhere on screen."""
+"""Reusable board widget – ô vuông, quân X vẽ 2 đường chéo, O vẽ tròn rỗng."""
 from __future__ import annotations
 import math
 import pygame
-from config import (BOARD_SIZE, EMPTY, HUMAN, AI, WIN_LENGTH,
-                    CELL, C_BOARD, C_GRID, C_GRID_HI, C_DOT,
-                    C_X, C_O, C_LAST, C_HOVER, C_WIN_CELL, C_DIM, C_W)
+from config import (BOARD_SIZE, EMPTY, HUMAN, AI,
+                    CELL, C_CELL_FILL, C_CELL_BD,
+                    C_X, C_O, C_WIN_CELL, C_DIM)
 
 
 class BoardWidget:
-    """
-    Draws a Caro board at (ox, oy) with given cell_size.
-    Accepts an external numpy grid (read-only view).
-    """
-
     def __init__(self, ox: int, oy: int, cell: int = CELL,
                  size: int = BOARD_SIZE, fonts=None,
                  interactive: bool = True):
@@ -26,7 +21,7 @@ class BoardWidget:
         self._hover: tuple | None = None
         self._win_cells: list     = []
         self._win_tick            = 0
-        self._place_anim: list    = []   # [(cx,cy,color,tick,max_tick)]
+        self._place_anim: list    = []   # [r, c, player, tick, max_tick]
 
     # ── Public API ────────────────────────────────────────────
     def set_win_cells(self, cells):
@@ -38,9 +33,7 @@ class BoardWidget:
         self._win_tick  = 0
 
     def trigger_anim(self, r, c, player):
-        cx, cy = self._px(r, c)
-        col = C_X if player == HUMAN else C_O
-        self._place_anim.append([cx, cy, col, 0, 10])
+        self._place_anim.append([r, c, player, 0, 10])
 
     def update(self):
         self._win_tick += 1
@@ -49,7 +42,6 @@ class BoardWidget:
             a[3] += 1
 
     def handle_event(self, ev):
-        """Returns (r,c) if user clicked a valid cell, else None."""
         if not self.interactive:
             return None
         if ev.type == pygame.MOUSEMOTION:
@@ -59,87 +51,111 @@ class BoardWidget:
         return None
 
     def draw(self, surf, grid, current_player=None, enabled=True):
-        self._draw_bg(surf)
-        self._draw_grid(surf)
+        self._draw_cells(surf)
         self._draw_labels(surf)
         self._draw_stones(surf, grid)
-        self._draw_last_move(surf, grid)
-        if enabled and self.interactive and current_player == HUMAN:
-            self._draw_hover(surf, grid)
         self._draw_win_anim(surf)
         self._draw_place_anim(surf)
+        if enabled and self.interactive and current_player == HUMAN:
+            self._draw_hover(surf, grid)
 
-    # ── Internals ─────────────────────────────────────────────
-    def _px(self, r, c):
-        return (self.ox + c * self.cell, self.oy + r * self.cell)
+    # ── Helpers ───────────────────────────────────────────────
+    def _cell_rect(self, r, c):
+        return pygame.Rect(self.ox + c * self.cell,
+                           self.oy + r * self.cell,
+                           self.cell, self.cell)
+
+    def _cell_center(self, r, c):
+        rect = self._cell_rect(r, c)
+        return rect.centerx, rect.centery
 
     def _cell_at(self, pos):
         px, py = pos
-        col = round((px - self.ox) / self.cell)
-        row = round((py - self.oy) / self.cell)
-        if 0 <= row < self.size and 0 <= col < self.size:
-            return row, col
+        c = (px - self.ox) // self.cell
+        r = (py - self.oy) // self.cell
+        if (0 <= r < self.size and 0 <= c < self.size and
+                self.ox <= px < self.ox + self.size * self.cell and
+                self.oy <= py < self.oy + self.size * self.cell):
+            return r, c
         return None
 
-    def _draw_bg(self, surf):
-        bw = (self.size - 1) * self.cell + self.cell
-        pygame.draw.rect(surf, C_BOARD,
-                         (self.ox - self.cell//2, self.oy - self.cell//2, bw, bw),
-                         border_radius=4)
+    # ── Draw helpers ──────────────────────────────────────────
+    def _draw_X(self, surf, r, c, col, alpha=255, thickness=None):
+        rect  = self._cell_rect(r, c)
+        pad   = self.cell // 5
+        thick = thickness or max(3, self.cell // 10)
+        x0, y0 = rect.x + pad, rect.y + pad
+        x1, y1 = rect.right - pad, rect.bottom - pad
 
-    def _draw_grid(self, surf):
-        for i in range(self.size):
-            x0 = self.ox; x1 = self.ox + (self.size-1)*self.cell
-            y  = self.oy + i*self.cell
-            col = C_GRID_HI if i in (0, self.size-1, self.size//2) else C_GRID
-            pygame.draw.line(surf, col, (x0, y), (x1, y))
-        for j in range(self.size):
-            y0 = self.oy; y1 = self.oy + (self.size-1)*self.cell
-            x  = self.ox + j*self.cell
-            col = C_GRID_HI if j in (0, self.size-1, self.size//2) else C_GRID
-            pygame.draw.line(surf, col, (x, y0), (x, y1))
-        # star points
-        for r, c in [(3,3),(3,11),(11,3),(11,11),(7,7)]:
-            if r < self.size and c < self.size:
-                cx, cy = self._px(r, c)
-                pygame.draw.circle(surf, C_DOT, (cx, cy), 3)
+        if alpha < 255:
+            s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            pygame.draw.line(s, (*col, alpha), (pad, pad),
+                             (rect.w-pad, rect.h-pad), thick)
+            pygame.draw.line(s, (*col, alpha), (rect.w-pad, pad),
+                             (pad, rect.h-pad), thick)
+            surf.blit(s, rect.topleft)
+        else:
+            # glow
+            gs = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            pygame.draw.line(gs, (*col, 35), (pad-2, pad-2),
+                             (rect.w-pad+2, rect.h-pad+2), thick+6)
+            pygame.draw.line(gs, (*col, 35), (rect.w-pad+2, pad-2),
+                             (pad-2, rect.h-pad+2), thick+6)
+            surf.blit(gs, rect.topleft)
+            pygame.draw.line(surf, col, (x0, y0), (x1, y1), thick)
+            pygame.draw.line(surf, col, (x1, y0), (x0, y1), thick)
+
+    def _draw_O(self, surf, r, c, col, alpha=255, thickness=None):
+        rect   = self._cell_rect(r, c)
+        pad    = self.cell // 5
+        thick  = thickness or max(3, self.cell // 10)
+        cx, cy = rect.centerx, rect.centery
+        radius = self.cell // 2 - pad
+
+        if alpha < 255:
+            s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            pygame.draw.circle(s, (*col, alpha),
+                               (rect.w//2, rect.h//2), radius, thick)
+            surf.blit(s, rect.topleft)
+        else:
+            # glow
+            gs = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            pygame.draw.circle(gs, (*col, 35),
+                               (rect.w//2, rect.h//2), radius+4, thick+6)
+            surf.blit(gs, rect.topleft)
+            pygame.draw.circle(surf, col, (cx, cy), radius, thick)
+
+    # ── Draw methods ──────────────────────────────────────────
+    def _draw_cells(self, surf):
+        for r in range(self.size):
+            for c in range(self.size):
+                rect = self._cell_rect(r, c)
+                pygame.draw.rect(surf, C_CELL_FILL, rect)
+                pygame.draw.rect(surf, C_CELL_BD, rect, 1)
 
     def _draw_labels(self, surf):
-        if not self.fonts:
-            return
         f = self.fonts.get("small")
         if not f:
             return
-        letters = "ABCDEFGHJKLMNOP"
+        letters = "ABCDEFGHI"
         for i in range(self.size):
-            x = self.ox + i*self.cell
+            cx, _ = self._cell_center(0, i)
             t = f.render(letters[i], True, C_DIM)
-            surf.blit(t, t.get_rect(center=(x, self.oy - 18)))
-            t2 = f.render(str(i+1), True, C_DIM)
-            surf.blit(t2, t2.get_rect(center=(self.ox - 18, self.oy + i*self.cell)))
+            surf.blit(t, t.get_rect(center=(cx, self.oy - 16)))
+            _, cy = self._cell_center(i, 0)
+            t2 = f.render(str(i + 1), True, C_DIM)
+            surf.blit(t2, t2.get_rect(center=(self.ox - 16, cy)))
 
     def _draw_stones(self, surf, grid):
-        rad = self.cell // 2 - 3
         for r in range(self.size):
             for c in range(self.size):
                 p = grid[r][c]
                 if p == EMPTY:
                     continue
-                cx, cy = self._px(r, c)
-                col = C_X if p == HUMAN else C_O
-                # glow
-                gs = pygame.Surface((rad*2+10, rad*2+10), pygame.SRCALPHA)
-                pygame.draw.circle(gs, (*col, 40), (rad+5, rad+5), rad+4)
-                surf.blit(gs, (cx-rad-5, cy-rad-5))
-                # stone
-                pygame.draw.circle(surf, col, (cx, cy), rad)
-                # highlight
-                hl = tuple(min(255, v+70) for v in col)
-                pygame.draw.circle(surf, hl, (cx-rad//4, cy-rad//4), rad//3)
-
-    def _draw_last_move(self, surf, grid):
-        # find last move from grid iteration is not possible, handled externally
-        pass  # caller calls trigger_anim instead
+                if p == HUMAN:
+                    self._draw_X(surf, r, c, C_X)
+                else:
+                    self._draw_O(surf, r, c, C_O)
 
     def _draw_hover(self, surf, grid):
         if self._hover is None:
@@ -147,30 +163,56 @@ class BoardWidget:
         r, c = self._hover
         if not (0 <= r < self.size and 0 <= c < self.size and grid[r][c] == EMPTY):
             return
-        cx, cy = self._px(r, c)
-        rad = self.cell // 2 - 3
-        s = pygame.Surface((rad*2+2, rad*2+2), pygame.SRCALPHA)
-        pygame.draw.circle(s, (255,255,255,40), (rad+1,rad+1), rad)
-        surf.blit(s, (cx-rad-1, cy-rad-1))
+        rect = self._cell_rect(r, c)
+        s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+        s.fill((255, 255, 255, 20))
+        surf.blit(s, rect.topleft)
+        # preview X mờ
+        self._draw_X(surf, r, c, C_X, alpha=60)
 
     def _draw_win_anim(self, surf):
         if not self._win_cells:
             return
-        t = (self._win_tick % 40) / 40
-        alpha = int(100 + 100 * math.sin(t * math.pi * 2))
-        rad   = self.cell // 2 - 1
+        t     = (self._win_tick % 40) / 40
+        alpha = int(70 + 70 * math.sin(t * math.pi * 2))
         for r, c in self._win_cells:
-            cx, cy = self._px(r, c)
-            s = pygame.Surface((rad*2+4, rad*2+4), pygame.SRCALPHA)
-            pygame.draw.circle(s, (0, 255, 150, alpha), (rad+2, rad+2), rad+1)
-            surf.blit(s, (cx-rad-2, cy-rad-2))
+            rect = self._cell_rect(r, c)
+            s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+            s.fill((0, 255, 150, alpha))
+            surf.blit(s, rect.topleft)
+            pygame.draw.rect(surf, C_WIN_CELL, rect, 2)
 
     def _draw_place_anim(self, surf):
-        for cx, cy, col, tick, max_tick in self._place_anim:
-            t   = tick / max_tick
-            rad = int((self.cell//2 - 3) * t)
-            if rad <= 0:
+        """Hiệu ứng quân xuất hiện dần (scale từ 0 → 1)."""
+        for r, c, player, tick, max_tick in self._place_anim:
+            t = tick / max_tick          # 0.0 → 1.0
+            if t <= 0:
                 continue
-            s = pygame.Surface((rad*2+2, rad*2+2), pygame.SRCALPHA)
-            pygame.draw.circle(s, (*col, int(200*(1-t))), (rad+1,rad+1), rad)
-            surf.blit(s, (cx-rad-1, cy-rad-1))
+            rect  = self._cell_rect(r, c)
+            pad   = self.cell // 5
+            thick = max(3, self.cell // 10)
+
+            # Scale ô xung quanh tâm
+            cx, cy = rect.centerx, rect.centery
+            half   = int((self.cell // 2 - pad) * t)
+            if half < 2:
+                continue
+
+            if player == HUMAN:
+                # vẽ X thu nhỏ
+                s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+                a = int(220 * t)
+                pygame.draw.line(s, (*C_X, a),
+                                 (rect.w//2 - half, rect.h//2 - half),
+                                 (rect.w//2 + half, rect.h//2 + half), thick)
+                pygame.draw.line(s, (*C_X, a),
+                                 (rect.w//2 + half, rect.h//2 - half),
+                                 (rect.w//2 - half, rect.h//2 + half), thick)
+                surf.blit(s, rect.topleft)
+            else:
+                # vẽ O thu nhỏ
+                s = pygame.Surface((rect.w, rect.h), pygame.SRCALPHA)
+                a = int(220 * t)
+                pygame.draw.circle(s, (*C_O, a),
+                                   (rect.w//2, rect.h//2), half, thick)
+                surf.blit(s, rect.topleft)

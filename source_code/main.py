@@ -2,7 +2,7 @@
 """
 Caro AI – Main Entry Point
 ==========================
-WIN = 4 quân liên tiếp  |  Bàn cờ 15×15
+WIN = 4 quân liên tiếp  |  Bàn cờ 9×9
 
 Màn hình:
   0. Human vs Human        – 2 người chơi cùng máy

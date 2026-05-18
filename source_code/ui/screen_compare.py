@@ -22,7 +22,7 @@ RIGHT_BX   = LEFT_BX + BOARD_SIZE * SMALL_CELL + 30
 MID_X      = RIGHT_BX + BOARD_SIZE * SMALL_CELL + 14
 PANEL_W    = WIN_W - MID_X - 6
 BY2        = 55
-LOG_H      = 180
+LOG_H      = 155
 
 
 class ScreenCompare:
@@ -224,7 +224,7 @@ class ScreenCompare:
         if mm and ab:
             same = (mm.move == ab.move)
             col  = C_GOOD if same else C_WARN
-            msg  = "✓ Same move" if same else "≠ Different move"
+            msg  = " Same move" if same else " Different move"
             draw_label(surf, msg, px+4, y, f["body"], col)
 
         self.btn_new.draw(surf); self.btn_back.draw(surf)
@@ -232,16 +232,16 @@ class ScreenCompare:
     def _draw_log_headers(self):
         f    = self.fonts["small"]
         half = WIN_W//2
-        self.screen.blit(f.render("▶ Minimax Move Log", True, C_ACC),
+        self.screen.blit(f.render(" Minimax Move Log", True, C_ACC),
                          (4, WIN_H-LOG_H-16))
-        self.screen.blit(f.render("▶ AlphaBeta Move Log", True, (255,85,110)),
+        self.screen.blit(f.render(" AlphaBeta Move Log", True, (255,85,110)),
                          (half+4, WIN_H-LOG_H-16))
 
     def _draw_status(self):
         f  = self.fonts["header"]
         cx = LEFT_BX + (BOARD_SIZE*SMALL_CELL)//2
         if self.state=="win":
-            name = "HUMAN WINS! 🎉" if self.winner==HUMAN else "AI WINS!"
+            name = "HUMAN WINS! " if self.winner==HUMAN else "AI WINS!"
             col  = C_X if self.winner==HUMAN else C_O
             t=f.render(name,True,col)
         elif self.state=="draw":
