@@ -10,21 +10,72 @@ Game cờ Caro 9×9 với AI sử dụng Minimax và Alpha-Beta Pruning, viết 
 
 ---
 
-## Cài đặt
+## Cài đặt & Cách chạy
 
-### Yêu cầu
-- Python 3.10 trở lên
+### Cách 1: Chạy bằng file `.exe` (Windows, không cần cài Python)
 
-### Cài thư viện
+> Dành cho người dùng phổ thông, không cần biết lập trình.
+
+1. Giải nén file ZIP về máy.
+2. Vào thư mục `source_code/`.
+3. Double-click vào file **`CaroAI.exe`** để chạy trực tiếp.
+
+>  Nếu Windows hiện cảnh báo "Windows protected your PC", nhấn **More info → Run anyway** để tiếp tục.
+
+---
+
+### Cách 2: Chạy bằng Python (Windows / macOS / Linux)
+
+> Dành cho người có cài Python, hoặc muốn chỉnh sửa source code.
+
+#### Yêu cầu
+
+- Python **3.10** trở lên → tải tại [python.org](https://www.python.org/downloads/)
+
+#### Bước 1 – Giải nén và mở terminal
+
+```bash
+cd 23021304_23021324_CaroAI-main
+```
+
+#### Bước 2 – Cài thư viện
+
 ```bash
 pip install -r requirements.txt
 ```
 
-### Chạy game
+#### Bước 3 – Chạy game
+
 ```bash
 cd source_code
 python main.py
 ```
+
+> **macOS / Linux:** nếu máy có cả Python 2 và 3, dùng `python3 main.py`.
+
+---
+
+## Hướng dẫn sử dụng
+
+### Màn hình Menu chính
+
+Sau khi khởi động, chọn 1 trong 5 chế độ chơi:
+
+| Số | Tên chế độ | Mô tả |
+|----|------------|-------|
+| 0 | **Human vs Human** | 2 người chơi luân phiên trên cùng máy |
+| 1 | **Human vs Minimax** | Đấu với AI Minimax thuần (không cắt nhánh) |
+| 2 | **Human vs AlphaBeta** | Đấu với AI Minimax + Alpha-Beta Pruning |
+| 3 | **So sánh song song** | 2 AI tính cùng lúc, hiển thị song song để so sánh tốc độ |
+| 4 | **Ultimate AI** | AlphaBeta + Iterative Deepening + Transposition Table (mạnh nhất) |
+
+### Trong ván cờ
+
+- **Click chuột trái** vào ô bất kỳ trên bàn cờ để đặt quân.
+- **Panel bên phải** cho phép:
+  - Chọn **You First** (đi trước, quân X) hoặc **AI First** (đi sau, quân O).
+  - Chọn độ khó: **Easy** / **Medium** / **Hard** (tương ứng độ sâu tìm kiếm 1 / 2 / 3).
+  - Thay đổi lựa chọn sẽ tự động reset ván mới.
 
 ---
 
@@ -54,6 +105,7 @@ python main.py
 source_code/
 ├── main.py              # Entry point
 ├── config.py            # Cấu hình toàn cục (kích thước, màu sắc, điểm số)
+├── CaroAI.exe           # File thực thi Windows (chạy thẳng, không cần Python)
 ├── core/
 │   ├── board.py         # Quản lý trạng thái bàn cờ
 │   ├── rules.py         # Kiểm tra thắng / hoà
@@ -124,4 +176,4 @@ DEPTHS = {"Easy": 1, "Medium": 2, "Hard": 3}
 
 - OS: Windows / macOS / Linux
 - RAM: tối thiểu 256 MB
-- Python: 3.10+
+- Python: 3.10+ *(chỉ cần nếu chạy bằng Python)*
