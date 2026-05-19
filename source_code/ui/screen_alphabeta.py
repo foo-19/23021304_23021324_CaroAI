@@ -1,4 +1,4 @@
-"""Screen 2 – Human vs AlphaBeta (Minimax + Alpha-Beta pruning)."""
+"""Screen 2 : Human vs AlphaBeta (Minimax + Alpha-Beta pruning)."""
 from __future__ import annotations
 import threading
 import pygame

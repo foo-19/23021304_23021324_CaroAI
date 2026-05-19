@@ -1,4 +1,4 @@
-"""Screen 1 – Human vs Minimax (pure, no alpha-beta)."""
+"""Screen 1 : Human vs Minimax (pure, no alpha-beta)."""
 from __future__ import annotations
 import threading
 import pygame
@@ -69,7 +69,7 @@ class ScreenMinimax:
         self._turn_no = 0
         self.log.clear()
 
-    # ── Main API ──────────────────────────────────────────────
+    #  Main API 
     def handle_event(self, ev) -> str | None:
         self.log.handle(ev)
 
@@ -115,7 +115,7 @@ class ScreenMinimax:
         # status bar
         self._draw_status()
 
-    # ── Internal ──────────────────────────────────────────────
+    # Internal 
     def _human_move(self, r, c):
         if not self.board.is_valid(r, c):
             return

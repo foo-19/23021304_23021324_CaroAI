@@ -22,7 +22,7 @@ def get_candidates(grid, size=BOARD_SIZE, radius=CANDIDATE_RADIUS):
 
 def _quick_score(grid, r, c, size):
     """
-    Heuristic nhanh để sắp xếp candidate – KHÔNG simulate đặt quân,
+    Heuristic nhanh để sắp xếp candidate : KHÔNG simulate đặt quân,
     chỉ đếm quân lân cận và chuỗi kề liền.
     Ưu tiên: ô kề cạnh quân địch (phòng thủ) > ô kề cạnh quân mình (tấn công).
     """

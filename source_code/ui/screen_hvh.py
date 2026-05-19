@@ -74,7 +74,7 @@ class ScreenHvH:
         self.log.draw(self.screen)
         self._draw_status()
 
-    # ── Place move ────────────────────────────────────────────
+    #  Place move 
     def _place(self, r, c):
         if not self.board.is_valid(r, c):
             return
@@ -172,7 +172,7 @@ class ScreenHvH:
         self.btn_new.draw(surf)
         self.btn_back.draw(surf)
 
-    # ── Status bar ────────────────────────────────────────────
+    # Status bar 
     def _draw_status(self):
         f  = self.fonts["header"]
         cx = BX + (BOARD_SIZE-1)*CELL//2

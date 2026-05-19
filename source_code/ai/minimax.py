@@ -1,4 +1,4 @@
-"""Pure Minimax – no pruning. Used for Level 1 and benchmark baseline."""
+"""Pure Minimax : no pruning. Used for Level 1 and benchmark baseline."""
 from __future__ import annotations
 import time
 import numpy as np

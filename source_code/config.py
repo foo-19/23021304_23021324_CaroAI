@@ -1,6 +1,6 @@
-# ============================================================
+
 #  config.py  –  Caro AI  –  Global Configuration
-# ============================================================
+
 
 BOARD_SIZE   = 9
 WIN_LENGTH   = 4        # ← đề yêu cầu 4 quân liên tiếp
@@ -9,11 +9,11 @@ HUMAN        = 1
 AI           = 2
 CANDIDATE_RADIUS = 2
 
-# ── Window ────────────────────────────────────────────────────
+#  Window 
 WIN_W = 1280
 WIN_H = 780
 
-# ── Board render ──────────────────────────────────────────────
+#  Board render 
 CELL  = 56              # ô vuông 56×56 px
 BX    = 40              # board left offset
 BY    = 80              # board top  offset
@@ -24,7 +24,7 @@ PANEL_W = WIN_W - PANEL_X - 6
 
 FPS   = 60
 
-# ── Colors ───────────────────────────────────────────────────
+#  Colors 
 C_BG         = (13, 15, 22)
 C_BOARD      = (20, 25, 38)
 C_GRID       = (38, 50, 72)
@@ -54,7 +54,7 @@ C_BTN_H      = (45, 60, 98)
 C_BTN_A      = (50, 110, 190)
 C_BTN_BD     = (55, 72, 115)
 
-# ── Evaluation weights ────────────────────────────────────────
+#  Evaluation weights 
 SC_WIN       =  1_000_000
 SC_LOSE      = -1_000_000
 
@@ -72,5 +72,5 @@ SC_EN_C3     =   -4_000
 SC_EN_O2     =   -1_500
 SC_EN_C2     =     -300
 
-# ── Difficulty depths ─────────────────────────────────────────
+# Difficulty depths 
 DEPTHS = {"Easy": 1, "Medium": 2, "Hard": 3}

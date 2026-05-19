@@ -15,7 +15,7 @@ from ai.alphabeta import AlphaBeta
 from ui.board_widget import BoardWidget
 from ui.common import Button, MoveLog, make_fonts, draw_label, draw_separator
 
-# ── Layout constants ──────────────────────────────────────────
+#  Layout constants 
 SMALL_CELL = 28          # smaller cells to fit 2 boards
 LEFT_BX    = 10
 RIGHT_BX   = LEFT_BX + BOARD_SIZE * SMALL_CELL + 30

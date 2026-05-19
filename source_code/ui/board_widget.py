@@ -1,4 +1,4 @@
-"""Reusable board widget – ô vuông, quân X vẽ 2 đường chéo, O vẽ tròn rỗng."""
+"""Reusable board widget : ô vuông, quân X vẽ 2 đường chéo, O vẽ tròn rỗng."""
 from __future__ import annotations
 import math
 import pygame
@@ -23,7 +23,7 @@ class BoardWidget:
         self._win_tick            = 0
         self._place_anim: list    = []   # [r, c, player, tick, max_tick]
 
-    # ── Public API ────────────────────────────────────────────
+    #  Public API 
     def set_win_cells(self, cells):
         self._win_cells = cells
         self._win_tick  = 0
@@ -59,7 +59,7 @@ class BoardWidget:
         if enabled and self.interactive and current_player == HUMAN:
             self._draw_hover(surf, grid)
 
-    # ── Helpers ───────────────────────────────────────────────
+    #  Helpers 
     def _cell_rect(self, r, c):
         return pygame.Rect(self.ox + c * self.cell,
                            self.oy + r * self.cell,
@@ -79,7 +79,7 @@ class BoardWidget:
             return r, c
         return None
 
-    # ── Draw helpers ──────────────────────────────────────────
+    #  Draw helpers 
     def _draw_X(self, surf, r, c, col, alpha=255, thickness=None):
         rect  = self._cell_rect(r, c)
         pad   = self.cell // 5
@@ -125,7 +125,7 @@ class BoardWidget:
             surf.blit(gs, rect.topleft)
             pygame.draw.circle(surf, col, (cx, cy), radius, thick)
 
-    # ── Draw methods ──────────────────────────────────────────
+    # Draw methods 
     def _draw_cells(self, surf):
         for r in range(self.size):
             for c in range(self.size):
