@@ -19,23 +19,24 @@ class AlphaBeta:
         self._tt: dict = {}
         self.nodes  = 0
 
-    def get_move(self, grid: np.ndarray) -> MoveResult:
-        self.nodes = 0
-        self._tt.clear()
+    def get_move(self, grid: np.ndarray, clear_tt=True) -> MoveResult:
+        self.nodes = 1
+        if clear_tt:
+            self._tt.clear()
         t0     = time.perf_counter()
         center = self.size / 2.0
 
         # Pass 1: AI thắng ngay?
-        win_move = _find_immediate(grid, AI, self.size)
+        win_move, n1 = _find_immediate(grid, AI, self.size)
+        self.nodes += n1
         if win_move:
-            self.nodes += 1
             return MoveResult(win_move, SC_WIN, self.nodes,
                               self.depth, time.perf_counter() - t0, "AlphaBeta")
 
         # Pass 2: chặn địch thắng ngay (quét toàn bàn)
-        block_move = _find_immediate(grid, HUMAN, self.size)
+        block_move, n2 = _find_immediate(grid, HUMAN, self.size)
+        self.nodes += n2
         if block_move:
-            self.nodes += 1
             return MoveResult(block_move, SC_LOSE + 1, self.nodes,
                               self.depth, time.perf_counter() - t0, "AlphaBeta")
 
@@ -62,7 +63,6 @@ class AlphaBeta:
                           self.depth, time.perf_counter() - t0, "AlphaBeta")
 
     def _ab(self, grid, depth, alpha, beta, is_max):
-        self.nodes += 1
         key = hash(grid.tobytes())
         if self.use_tt:
             e = self._tt.get(key)
@@ -77,14 +77,16 @@ class AlphaBeta:
             return evaluate(grid, self.size)
 
         orig_a = alpha
+        orig_b = beta
         best   = -10**9 if is_max else 10**9
         player = AI if is_max else HUMAN
 
         for r, c in get_ordered_candidates(grid, player, self.size):
             grid[r][c] = player
+            self.nodes += 1
             if check_win(grid, r, c, player, self.size):
                 grid[r][c] = EMPTY
-                best = SC_WIN if is_max else SC_LOSE
+                best = SC_WIN + depth if is_max else SC_LOSE - depth
                 break
             val = self._ab(grid, depth - 1, alpha, beta, not is_max)
             grid[r][c] = EMPTY
@@ -100,7 +102,7 @@ class AlphaBeta:
         if self.use_tt:
             flag = EXACT
             if best <= orig_a: flag = UPPER
-            elif best >= beta: flag = LOWER
+            elif best >= orig_b: flag = LOWER
             if len(self._tt) < 150_000:
                 self._tt[key] = (best, depth, flag, None)
 
