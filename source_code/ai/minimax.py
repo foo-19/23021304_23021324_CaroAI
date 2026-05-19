@@ -20,15 +20,17 @@ class MoveResult:
 
 
 def _find_immediate(grid, player, size):
-    """Trả về ô đầu tiên mà `player` đặt vào sẽ thắng ngay, hoặc None."""
+    """Trả về (ô_thắng, số_node_đã_duyệt) hoặc (None, số_node_đã_duyệt)."""
+    nodes = 0
     rs, cs = np.where(grid == EMPTY)
     for r, c in zip(rs.tolist(), cs.tolist()):
         grid[r][c] = player
+        nodes += 1
         win = check_win(grid, r, c, player, size)
         grid[r][c] = EMPTY
         if win:
-            return (r, c)
-    return None
+            return (r, c), nodes
+    return None, nodes
 
 
 class Minimax:
@@ -38,21 +40,21 @@ class Minimax:
         self.nodes = 0
 
     def get_move(self, grid: np.ndarray) -> MoveResult:
-        self.nodes = 0
+        self.nodes = 1
         t0 = time.perf_counter()
         center = self.size / 2.0
 
         # Pass 1: AI thắng ngay?
-        win_move = _find_immediate(grid, AI, self.size)
+        win_move, n1 = _find_immediate(grid, AI, self.size)
+        self.nodes += n1
         if win_move:
-            self.nodes += 1
             return MoveResult(win_move, SC_WIN, self.nodes,
                               self.depth, time.perf_counter() - t0, "Minimax")
 
         # Pass 2: chặn địch thắng ngay (quét toàn bàn, không giới hạn radius)
-        block_move = _find_immediate(grid, HUMAN, self.size)
+        block_move, n2 = _find_immediate(grid, HUMAN, self.size)
+        self.nodes += n2
         if block_move:
-            self.nodes += 1
             return MoveResult(block_move, SC_LOSE + 1, self.nodes,
                               self.depth, time.perf_counter() - t0, "Minimax")
 
@@ -76,7 +78,6 @@ class Minimax:
                           self.depth, time.perf_counter() - t0, "Minimax")
 
     def _mm(self, grid, depth, is_max):
-        self.nodes += 1
         if depth == 0 or is_draw(grid, self.size):
             return evaluate(grid, self.size)
 
@@ -84,9 +85,10 @@ class Minimax:
             best = -10**9
             for r, c in get_ordered_candidates(grid, AI, self.size):
                 grid[r][c] = AI
+                self.nodes += 1
                 if check_win(grid, r, c, AI, self.size):
                     grid[r][c] = EMPTY
-                    return SC_WIN
+                    return SC_WIN + depth
                 best = max(best, self._mm(grid, depth - 1, False))
                 grid[r][c] = EMPTY
             return best
@@ -94,9 +96,10 @@ class Minimax:
             best = 10**9
             for r, c in get_ordered_candidates(grid, HUMAN, self.size):
                 grid[r][c] = HUMAN
+                self.nodes += 1
                 if check_win(grid, r, c, HUMAN, self.size):
                     grid[r][c] = EMPTY
-                    return SC_LOSE
+                    return SC_LOSE - depth
                 best = min(best, self._mm(grid, depth - 1, True))
                 grid[r][c] = EMPTY
             return best

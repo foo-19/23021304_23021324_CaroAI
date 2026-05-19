@@ -84,9 +84,7 @@ class ScreenCompare:
     def update(self):
         self.bw_left.update(); self.bw_right.update()
         if self.state == "thinking":
-            mm_done = (self._mm_thread and not self._mm_thread.is_alive())
-            ab_done = (self._ab_thread and not self._ab_thread.is_alive())
-            if mm_done and ab_done:
+            if hasattr(self, '_worker_thread') and self._worker_thread and not self._worker_thread.is_alive():
                 self._apply_ai_results()
 
     def draw(self):
@@ -136,14 +134,13 @@ class ScreenCompare:
         d = self._depth
         self._mm_result = None; self._ab_result = None
 
-        def mm_worker():
+        def worker():
+            # Chạy tuần tự để tránh Python GIL làm sai lệch kết quả đo thời gian
             self._mm_result = Minimax(depth=d).get_move(grid_copy.copy())
-        def ab_worker():
-            self._ab_result = AlphaBeta(depth=d).get_move(grid_copy.copy())
+            self._ab_result = AlphaBeta(depth=d, use_tt=False).get_move(grid_copy.copy())
 
-        self._mm_thread = threading.Thread(target=mm_worker, daemon=True)
-        self._ab_thread = threading.Thread(target=ab_worker, daemon=True)
-        self._mm_thread.start(); self._ab_thread.start()
+        self._worker_thread = threading.Thread(target=worker, daemon=True)
+        self._worker_thread.start()
 
     def _apply_ai_results(self):
         """Both done – apply the AlphaBeta move (canonical), show both stats."""

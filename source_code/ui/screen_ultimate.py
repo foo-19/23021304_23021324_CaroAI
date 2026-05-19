@@ -39,9 +39,10 @@ class IterativeDeepeningAB:
         best_move = None; best_val = -10**9
         total_nodes = 0; depth_used = 1
 
+        ab = AlphaBeta(size=self.size, use_tt=True)
         for d in range(1, max_d+1):
-            ab = AlphaBeta(depth=d, size=self.size, use_tt=True)
-            res = ab.get_move(grid.copy())
+            ab.depth = d
+            res = ab.get_move(grid.copy(), clear_tt=False)
             total_nodes += res.nodes
             if res.move:
                 best_move = res.move; best_val = res.value; depth_used = d

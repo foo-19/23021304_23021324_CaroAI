@@ -50,6 +50,11 @@ def _pat(cnt, ho, ot, is_ai):
     opens = int(ho) + int(ot)
     if cnt >= WIN_LENGTH:
         return SC_WIN if is_ai else SC_LOSE
+    
+    #Nếu chuỗi bị chặn cả 2 đầu (opens == 0), nó là chuỗi chết, không có giá trị
+    if opens == 0:
+        return 0
+
     if is_ai:
         if cnt == 3: return SC_AI_O4 if opens == 2 else SC_AI_C4
         if cnt == 2: return SC_AI_O3 if opens == 2 else SC_AI_C3   # note: WIN=4, so 3-in-row is near-win
